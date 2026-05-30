@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>⚡ V5.0 WebSocket Stream Test Center</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; background: #f5f5f7; color: #1d1d1f; padding: 30px; }
+        .container { max-width: 800px; margin: 0 auto; background: #ffffff; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
+        h2 { margin-top: 0; font-weight: 600; font-size: 22px; }
+        .input-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { flex: 1; padding: 12px; border: 1px solid #e5e5e7; border-radius: 8px; background: #f5f5f7; font-size: 14px; }
+        button { padding: 12px 24px; background: #0071e3; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; }
+        button:hover { background: #0077ed; }
+        .panel-title { font-size: 14px; font-weight: 500; color: #86868b; margin-bottom: 6px; }
+        textarea { width: 100%; height: 260px; padding: 15px; border: none; border-radius: 12px; background: #f5f5f7; font-family: "SF Mono", monospace; font-size: 13px; line-height: 1.6; box-sizing: border-box; resize: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>⚡ V5.0 WebSocket Stream Tester</h2>
+    <div class="input-box">
+        <input type="text" id="userMsg" placeholder="输入意图测试混合检索与子线程（如留下称呼和微信）..." value="我是 Wantao，我的微信是 wt123456，想采购 50 台设备。">
+        <button onclick="sendMessage()">发送载荷</button>
+    </div>
+    
+    <div class="panel-title">🤖 Agent 后台流式思考轨迹 (Log Stream)</div>
+    <textarea id="logStream" readonly placeholder="等待长连接状态机激活..."></textarea>
+    
+    <div class="panel-title" style="margin-top: 15px;">💬 Agent 最终给出的流式答复 (Final Answer)</div>
+    <textarea id="finalAnswer" style="height: 100px;" readonly placeholder="等待最终闭环结论..."></textarea>
+</div>
+
+<script>
+    // 🔌 一键建立与 FastAPI 后端的长连接全双工隧道
+    // ✅ 新连接：动态生成租户 ID，实现后端 SQL 数据库的物理级别会话隔离
+    const random_session = "Wantao_Client_" + Math.floor(Math.random() * 1000);
+    const ws = new WebSocket("ws://127.0.0.1:8000/ws/agent/chat?session_id=" + random_session);
+    console.log("正在以租户身份建立连接: " + random_session);
+
+    ws.onopen = () => {
+        console.log("🟢 [WS 前端] 与 8000 端口微服务隧道连通成功！");
+        document.getElementById("logStream").placeholder = "🟢 长连接已就绪。请在上方输入测试文本并点击发送...";
+    };
+
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        
+        // 🔄 实时流式流接收后端推送的 JSON 碎片并动态渲染
+        if (data.type === "streaming") {
+            if (data.log_stream) {
+                document.getElementById("logStream").value = data.log_stream;
+                // 自动滚动到底部，保持极客流视感
+                document.getElementById("logStream").scrollTop = document.getElementById("logStream").scrollHeight;
+            }
+            if (data.final_answer && data.final_answer !== "Agent 正在深度思考中...") {
+                document.getElementById("finalAnswer").value = data.final_answer;
+            }
+        } else if (data.type === "done") {
+            console.log("🏁 [WS 前端] 本轮状态机跑通完毕。");
+        }
+    };
+
+    ws.onclose = () => {
+        console.log("🔴 [WS 前端] 隧道已安全关闭。");
+    };
+
+    function sendMessage() {
+        const msg = document.getElementById("userMsg").value;
+        if (!msg.strip && msg.trim() === "") return;
+        
+        // 清空旧面板
+        document.getElementById("logStream").value = "🚀 载荷已通过 WebSocket 隧道发送，正在等待状态机响应...\n";
+        document.getElementById("finalAnswer").value = "";
+        
+        // 📤 压缩并发送标准结构化全双工 JSON 载荷
+        ws.send(json = JSON.stringify({
+            "message": msg,
+            "history": [] // 可以在这里塞入历史上下文
+        }));
+    }
+</script>
+
+</body>
+</html>
