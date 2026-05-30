@@ -1,4 +1,3 @@
-```markdown
 # 🌍 Cross-Border Multi-Agent Sales Console (跨境出海多智能体私域获客控制台)
 
 [![Python Version](https://img.shields.io/badge/Python-3.10+-blue.svg?style=flat-square)](https://www.python.org/)
@@ -154,7 +153,5 @@ python app.py
 * [ ] 动态支持 PDF / Word / Markdown 多格式文档批量切片上传
 * [ ] 接入海外 WhatsApp Cloud API，实现真实私域通道的双向自动接单响应
 * [ ] 引入内存滑动窗口（Sliding Window）与历史摘要算法深度优化大模型上下文成本
-
-```
 
 ```
