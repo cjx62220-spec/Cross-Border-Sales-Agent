@@ -67,14 +67,14 @@
 
     function sendMessage() {
         const msg = document.getElementById("userMsg").value;
-        if (!msg.strip && msg.trim() === "") return;
-        
+        if (!msg || msg.trim() === "") return;
+
         // 清空旧面板
         document.getElementById("logStream").value = "🚀 载荷已通过 WebSocket 隧道发送，正在等待状态机响应...\n";
         document.getElementById("finalAnswer").value = "";
-        
+
         // 📤 压缩并发送标准结构化全双工 JSON 载荷
-        ws.send(json = JSON.stringify({
+        ws.send(JSON.stringify({
             "message": msg,
             "history": [] // 可以在这里塞入历史上下文
         }));

@@ -1,4 +1,13 @@
+# 核心 LLM 与向量数据库
 openai
 python-dotenv
 chromadb
+
+# Web 框架
 gradio
+fastapi
+uvicorn[standard]
+python-multipart        # FastAPI 文件上传依赖
+
+# 文档解析
+pypdf                   # PDF 文件解析
